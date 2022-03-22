@@ -18,6 +18,7 @@ const runbot = async () => {
 
   driver.reactToMessages( processMessages );
   console.log('connected and waiting for messages');
+  await removeRoleFromUser('omri','bot')
 }
 
 
@@ -60,7 +61,7 @@ async function parseMessage(message){
         break;
 
     case "remove_role_from_user":
-        await removeRoleFromUser(messageParts[2], messageParts[3]);
+        await removeRoleFromUser(messageParts[2], messageParts[3]);  // not working
         break;
 
     default:
@@ -70,8 +71,8 @@ async function parseMessage(message){
 async function removeRoleFromUser(username , roleName)
 {
   const payLoad = {
-    "username": username,
-    "roleName": roleName
+    "roleName": "guest",
+    "username": "omri"
   }
   const res = await api.post("roles.removeUserFromRole", payLoad);
 
