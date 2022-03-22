@@ -18,7 +18,8 @@ const runbot = async () => {
 
   driver.reactToMessages( processMessages );
   console.log('connected and waiting for messages');
-  await addUserToGroup('room3','1')
+  await removeUserFromGroup('room2','1')
+  //await groupList();
 }
 
 
@@ -72,7 +73,18 @@ async function parseMessage(message){
       // code block
   }
 }
-
+async function groupList()
+{
+  const res = await api.get("groups.listAll",{});
+}
+async function removeUserFromGroup(groupName, username)
+{
+  const payLoad = {
+    "roomName": groupName,
+    "userId":await getUserId(username)
+  }
+  const res = await api.post("groups.kick", payLoad);
+}
 async function addUserToGroup(groupName, username)
 {
   const payLoad = {
