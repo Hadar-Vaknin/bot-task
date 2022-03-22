@@ -1,29 +1,19 @@
 const { driver , api, settings } = require('@rocket.chat/sdk');
-// customize the following with your server and BOT account information
 const HOST = 'http://localhost:3000';
 const USER = 'CMD_BOT';
 const PASS = '1234';
-const BOTNAME = 'easybot';  // name  bot response to
-const SSL = true;  // server uses https ?
-const ROOMS = ['GENERAL'];
-
+const BOTNAME = 'easybot';  
+settings.username=USER;
+settings.password=PASS;
+settings.host=HOST;
 var myuserid;
-// this simple bot does not handle errors, different message types, server resets 
-// and other production situations 
 
 const runbot = async () => {
-    settings.username=USER;
-    settings.password=PASS;
-    settings.host=HOST;
+
     const conn = await driver.connect();
 
     myuserid = await driver.login({username: USER, password: PASS});
-    createPrivateGroup();
-    // const subscribed = await driver.subscribeToMessages();
-    // console.log('subscribed');
-
-    // const msgloop = await driver.reactToMessages( processMessages );
-    // console.log('connected and waiting for messages');
+    createPublicGroup();
 }
 
 
@@ -42,13 +32,22 @@ const processMessages = async(err, message, messageOptions) => {
 }
 async function createPrivateGroup(){
     
-    const msgObj=    {
-        "msg": "method",
-        "id": "42",
-        "method": "createPrivateGroup",
-        "params": [ "roomWithHV", ["HV"], false ]
+    const msgObj={
+      "name":"groupTest",
+      "members":["HV"],
+      "readOnly": false
     }
-    const res=await api.post("method.call/createChannel",{"message":JSON.stringify(msgObj)});
+    const res=await api.post("groups.create",JSON.stringify(msgObj));
     
+}
+async function createPublicGroup(){
+    
+  const msgObj= {
+    "name":"publicChannelTest",
+    "members":[],
+    "readOnly": false
+  }
+  const res=await api.post("channels.create",JSON.stringify(msgObj));
+  
 }
 runbot();
