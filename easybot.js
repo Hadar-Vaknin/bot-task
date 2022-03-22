@@ -18,7 +18,7 @@ const runbot = async () => {
 
   driver.reactToMessages( processMessages );
   console.log('connected and waiting for messages');
-  await removeRoleFromUser('omri','bot')
+  await addUserToGroup('room3','1')
 }
 
 
@@ -40,33 +40,51 @@ async function parseMessage(message){
   console.log(messageParts);
   switch(messageParts[1]) {
     case "create_room":
-      const users=[];
+      let users=[];
       if(messageParts[4]!=''){
         users=messageParts[4].split(',')
       }
       if(messageParts[2].toLowerCase()==='public'){
-        await createPublicRoom(messageParts[3] , users);
+        await createPublicRoom(messageParts[3] , users); // easybot;create_room;public;room1;dsg,1
       }
       else if(messageParts[2].toLowerCase()==='private'){
-        await createPrivateRoom(messageParts[3] , users);
+        await createPrivateRoom(messageParts[3] , users);  //easybot;create_room;private;room2;dsg,1
       }
       break;
 
     case "set_user_active_status":
-      await setUserActiveStatus(messageParts[2], messageParts[3]);
+      await setUserActiveStatus(messageParts[2], messageParts[3]);  //easybot;set_user_active_status;1;true
       break;
 
     case "add_role_to_user":
-        await addRoleToUser(messageParts[2], messageParts[3]);
+        await addRoleToUser(messageParts[2], messageParts[3]);  //easybot;add_role_to_user;1;guest
         break;
 
     case "remove_role_from_user":
         await removeRoleFromUser(messageParts[2], messageParts[3]);  // not working
         break;
+    
+    case "add_user_to_group":
+      await addUserToGroup(messageParts[2], messageParts[3]);  //easybot;add_user_to_group;room3;1
+      break;
 
     default:
       // code block
   }
+}
+
+async function addUserToGroup(groupName, username)
+{
+  const payLoad = {
+    "roomName": groupName,
+    "userId":await getUserId(username)
+  }
+  const res = await api.post("groups.invite", payLoad);
+}
+async function sendMessageToUsers(username , roleName)
+{
+
+  
 }
 async function removeRoleFromUser(username , roleName)
 {
@@ -75,8 +93,6 @@ async function removeRoleFromUser(username , roleName)
     "username": "omri"
   }
   const res = await api.post("roles.removeUserFromRole", payLoad);
-
-  
 }
 async function addRoleToUser(username , roleName)
 {
@@ -115,7 +131,7 @@ async function getUserId(username)
 async function createPrivateRoom(roomName , members) {
   const payLoad = {
     "name": roomName,
-    "members": ["1"]
+    "members": members
   }
   const res = await api.post("groups.create", payLoad);
 
@@ -123,7 +139,7 @@ async function createPrivateRoom(roomName , members) {
 async function createPublicRoom(roomName , members) {
   const payLoad = {
     "name": roomName,
-    "members": []
+    "members": members
   }
   const res = await api.post("channels.create", payLoad);
 }
