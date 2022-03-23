@@ -1,5 +1,4 @@
-const { driver, api, settings } = require('@rocket.chat/sdk');
-const { username } = require('@rocket.chat/sdk/dist/lib/settings');
+const {driver, api, settings } = require('@rocket.chat');
 const HOST = 'http://localhost:3000';
 const USER = 'CMD_BOT';
 const PASS = '1234';
@@ -25,50 +24,67 @@ const processMessages = async (err, message) => {
   if (!err) {
     if (message.u._id === myuserid) return;
     if (message.msg.toLowerCase().startsWith(BOTNAME)) {
-      const response = message.u.username +
-        ', how can ' + BOTNAME + ' help you with ' +
-        message.msg.substr(BOTNAME.length + 1);
-      const sentmsg = await driver.sendDirectToUser(await parseMessage(message.msg), message.u.username)
+      await driver.sendDirectToUser(await parseMessage(message.msg), message.u.username)
     }
   }
 }
 async function parseMessage(message) {
   const messageParts = message.split(';');
+  if(message==='cmd_bot'){
+    return config.welcomeMsg;
+  }
   let users = [];
   switch (messageParts[1]) {
     case "create_room":
+      if(messageParts.length<5){
+        return "Not enough parameters!";
+      }
+      users=[]
       if (messageParts[4] != '') {
         users = messageParts[4].split(',')
       }
-      if (messageParts[2].toLowerCase() === 'public') {
-        await createPublicRoom(messageParts[3], users); // CMD_BOT;create_room;public;room1;dsg,1
-      }
-      else if (messageParts[2].toLowerCase() === 'private') {
-        await createPrivateRoom(messageParts[3], users);  //CMD_BOT;create_room;private;room2;dsg,1
-      }
+      handleCreateRoomCommand(messageParts[2],messageParts[3],users);
       break;
 
     case "set_user_active_status":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       await setUserActiveStatus(messageParts[2], messageParts[3]);  //CMD_BOT;set_user_active_status;1;true
       break;
 
     case "add_role_to_user":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       await addRoleToUser(messageParts[2], messageParts[3]);  //CMD_BOT;add_role_to_user;1;guest
       break;
 
     case "remove_role_from_user":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       await removeRoleFromUser(messageParts[2], messageParts[3]);  // CMD_BOT;remove_role_from_user;omri;user
       break;
 
     case "add_user_to_group":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       await addUserToGroup(messageParts[2], messageParts[3]);  //CMD_BOT;add_user_to_group;room3;1
       break;
 
     case "remove_user_from_group":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       await removeUserFromGroup(messageParts[2], messageParts[3]);  //CMD_BOT;remove_user_from_group;room3;1
       break;
 
     case "send_message":
+      if(messageParts.length<4){
+        return "Not enough parameters!";
+      }
       users = [];
       if (messageParts[3] === '') {
         return;
@@ -82,14 +98,28 @@ async function parseMessage(message) {
       break;
 
     case "get_room_details":
-      return (await getRoomDetails(messageParts[2]));  //CMD_BOT;get_room_details;room5
+      if(messageParts.length<3){
+        return "Not enough parameters!";
+      }
+      return "That's what I found:\n"+(await getRoomDetails(messageParts[2]));  //CMD_BOT;get_room_details;room5
       break;
 
     case "get_user_details":
-        return (await getUserDetails(messageParts[2]));  //CMD_BOT;get_user_details;1
-        break;
+      if(messageParts.length<3){
+        return "Not enough parameters!";
+      }
+      return "That's what I found:\n"+(await getUserDetails(messageParts[2]));  //CMD_BOT;get_user_details;1
+      break;
     default:
     // code block
+  }
+}
+async function handleCreateRoomCommand(option,roomName,users){
+  if (option.toLowerCase() === 'public') {
+    await createPublicRoom(roomName, users); // CMD_BOT;create_room;public;room1;dsg,1  #WORKING
+  }
+  else if (option.toLowerCase() === 'private') {
+    await createPrivateRoom(roomName, users);  //CMD_BOT;create_room;private;room2;dsg,1  #WORKING
   }
 }
 async function getGroupsInfo() {
@@ -189,14 +219,13 @@ async function createPrivateRoom(roomName, members) {
     "name": roomName,
     "members": members
   }
-  const res = await api.post("groups.create", payLoad);
-
+  await api.post("groups.create", payLoad);
 }
 async function createPublicRoom(roomName, members) {
   const payLoad = {
     "name": roomName,
     "members": members
   }
-  const res = await api.post("channels.create", payLoad);
+  await api.post("channels.create", payLoad);
 }
 runbot();
