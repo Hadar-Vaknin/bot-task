@@ -91,6 +91,7 @@ async function parseMessage(message) {
       return await sendMessageToUsers(messageParts[2], usersAsChannel); 
       break;
 
+      
     case "get_room_details": //********
       if(messageParts.length<3){
         return "Not enough parameters!";
