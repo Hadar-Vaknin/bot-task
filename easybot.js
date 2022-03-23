@@ -1,4 +1,3 @@
-//const {driver, api, settings } = require('@rocket.chat/sdk');
 import {driver, api, settings }  from '@rocket.chat/sdk'
 import { config } from './config.js';
 settings.username = config.user;
@@ -73,7 +72,7 @@ async function parseMessage(message) {
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
-      await removeUserFromGroup(messageParts[2], messageParts[3]);  //CMD_BOT;remove_user_from_group;room3;1
+      return await removeUserFromGroup(messageParts[2], messageParts[3]);  //CMD_BOT;remove_user_from_group;room3;1
       break;
 
     case "send_message": //********
@@ -108,6 +107,16 @@ async function parseMessage(message) {
     default:
       return "Unvalid command! - type cmd_bot for commands list.";
   }
+}
+async function removeUserFromGroup(roomName , userName){
+  const payLoad = {
+    "roomName": roomName,
+    "username":userName
+  }
+  if(!(await api.post("groups.kick", payLoad))){
+    return "Error occurred!"
+  }
+  return "Removed user from group!"
 }
 async function handleCreateRoomCommand(option,roomName,users){
   if (option.toLowerCase() === 'public') {
