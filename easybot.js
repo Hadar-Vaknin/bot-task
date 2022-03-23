@@ -29,7 +29,7 @@ async function parseMessage(message) {
   }
   let users = [];
   switch (messageParts[1]) {
-    case "create_room":  //********** 
+    case "create_room":  
       if(messageParts.length<5){
         return "Not enough parameters!";
       }
@@ -38,44 +38,43 @@ async function parseMessage(message) {
         users = messageParts[4].split(',')
       }
       return handleCreateRoomCommand(messageParts[2],messageParts[3],users);
-      break;
 
-    case "set_user_active_status":  //********** 
+
+    case "set_user_active_status":  
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
       return await setUserActiveStatus(messageParts[2], messageParts[3]); 
-      break;
 
-    case "add_role_to_user":  //********** 
+
+    case "add_role_to_user":   
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
       return await addRoleToUser(messageParts[2], messageParts[3]);  
-      break;
 
-    case "remove_role_from_user": //********** 
+
+    case "remove_role_from_user": 
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
       return await removeRoleFromUser(messageParts[2], messageParts[3]);  
-      break;
 
-    case "add_user_to_group": //*************
+
+    case "add_user_to_group": 
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
       return await addUserToGroup(messageParts[2], messageParts[3]);  //CMD_BOT;add_user_to_group;room3;1
-      break;
+
 
     case "remove_user_from_group":
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
       return await removeUserFromGroup(messageParts[2], messageParts[3]);  //CMD_BOT;remove_user_from_group;room3;1
-      break;
 
-    case "send_message": //********
+    case "send_message": 
       if(messageParts.length<4){
         return "Not enough parameters!";
       }
@@ -89,22 +88,20 @@ async function parseMessage(message) {
         usersAsChannel.push('@' + user)
       }
       return await sendMessageToUsers(messageParts[2], usersAsChannel); 
-      break;
 
-      
-    case "get_room_details": //********
+    case "get_room_details":
       if(messageParts.length<3){
         return "Not enough parameters!";
       }
       return await getRoomDetails(messageParts[2]);  
-      break;
 
-    case "get_user_details":  //********
+
+    case "get_user_details":  
       if(messageParts.length<3){
         return "Not enough parameters!";
       }
       return await getUserDetails(messageParts[2]);  
-      break;
+
     default:
       return "Unvalid command! - type cmd_bot for commands list.";
   }
