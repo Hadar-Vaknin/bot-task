@@ -1,4 +1,5 @@
-const {driver, api, settings } = require('@rocket.chat/sdk');
+//const {driver, api, settings } = require('@rocket.chat/sdk');
+import {driver, api, settings }  from '@rocket.chat/sdk'
 
 const HOST = 'http://localhost:3000';
 const USER = 'CMD_BOT';
