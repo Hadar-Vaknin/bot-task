@@ -1,4 +1,4 @@
-import {driver, api, settings }  from '@rocket.chat/sdk'
+import { driver, api, settings } from '@rocket.chat/sdk'
 import { config } from './config.js';
 settings.username = config.user;
 settings.password = config.password;
@@ -7,7 +7,7 @@ let myuserid;
 
 const runbot = async () => {
   await driver.connect();
-  myuserid = await driver.login({ username: config.user, password: config.password});
+  myuserid = await driver.login({ username: config.user, password: config.password });
   await driver.subscribeToMessages();
   console.log('subscribed');
   driver.reactToMessages(processMessages);
@@ -24,53 +24,53 @@ const processMessages = async (err, message) => {
 }
 async function parseMessage(message) {
   const messageParts = message.split(';');
-  if(message===config.botName){
+  if (message === config.botName) {
     return config.welcomeMsg;
   }
   let users = [];
   switch (messageParts[1]) {
-    case "create_room":{  
-      if(messageParts.length<5){
+    case "create_room": {
+      if (messageParts.length < 5) {
         return "Not enough parameters!";
       }
-      users=[]
+      users = []
       if (messageParts[4] != '') {
         users = messageParts[4].split(',')
       }
-      return handleCreateRoomCommand(messageParts[2],messageParts[3],users);
+      return handleCreateRoomCommand(messageParts[2], messageParts[3], users);
     }
     case "set_user_active_status": {
-      if(messageParts.length<4){
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
-      return await setUserActiveStatus(messageParts[2], messageParts[3]); 
+      return await setUserActiveStatus(messageParts[2], messageParts[3]);
     }
-    case "add_role_to_user":{  
-      if(messageParts.length<4){
+    case "add_role_to_user": {
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
-      return await addRoleToUser(messageParts[2], messageParts[3]); 
+      return await addRoleToUser(messageParts[2], messageParts[3]);
     }
-    case "remove_role_from_user":{ 
-      if(messageParts.length<4){
+    case "remove_role_from_user": {
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
       return await removeRoleFromUser(messageParts[2], messageParts[3]);
-    }  
-    case "add_user_to_group":{ 
-      if(messageParts.length<4){
+    }
+    case "add_user_to_group": {
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
-      return await addUserToGroup(messageParts[2], messageParts[3]);  
+      return await addUserToGroup(messageParts[2], messageParts[3]);
     }
-    case "remove_user_from_group":{
-      if(messageParts.length<4){
+    case "remove_user_from_group": {
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
-      return await removeUserFromGroup(messageParts[2], messageParts[3]);  
+      return await removeUserFromGroup(messageParts[2], messageParts[3]);
     }
-    case "send_message":{
-      if(messageParts.length<4){
+    case "send_message": {
+      if (messageParts.length < 4) {
         return "Not enough parameters!";
       }
       users = [];
@@ -82,37 +82,37 @@ async function parseMessage(message) {
       for (let user of users) {
         usersAsChannel.push('@' + user)
       }
-      return await sendMessageToUsers(messageParts[2], usersAsChannel); 
+      return await sendMessageToUsers(messageParts[2], usersAsChannel);
     }
-    case "get_room_details":{
-      if(messageParts.length<3){
+    case "get_room_details": {
+      if (messageParts.length < 3) {
         return "Not enough parameters!";
       }
       return await getRoomDetails(messageParts[2]);
-    }  
-    case "get_user_details":{  
-      if(messageParts.length<3){
+    }
+    case "get_user_details": {
+      if (messageParts.length < 3) {
         return "Not enough parameters!";
       }
       return await getUserDetails(messageParts[2]);
-    }  
+    }
     default:
       return "Unvalid command! - type cmd_bot for commands list.";
   }
 }
-async function removeUserFromGroup(roomName , userName){
-  try{
+async function removeUserFromGroup(roomName, userName) {
+  try {
     const payLoad = {
       "roomName": roomName,
-      "username":userName
+      "username": userName
     }
     await api.post("groups.kick", payLoad)
     return "Removed user from group succesfuly!"
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
-async function handleCreateRoomCommand(option,roomName,users){
+async function handleCreateRoomCommand(option, roomName, users) {
   if (option.toLowerCase() === 'public') {
     return await createPublicRoom(roomName, users);
   }
@@ -125,32 +125,31 @@ async function getGroupsInfo() {
   const res = await api.get("groups.listAll", {});
   return res.groups;
 }
-async function addUserToGroup(groupName, userName)
-{
-  try{
-    let userResult=await getUserInfo(userName);
+async function addUserToGroup(groupName, userName) {
+  try {
+    let userResult = await getUserInfo(userName);
     const payLoad = {
       "roomName": groupName,
-      "userId":userResult.user._id
+      "userId": userResult.user._id
     }
     await api.post("groups.invite", payLoad)
     return "Added user to group succesfuly!"
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
 async function getUserDetails(userName) {
-  try{
-    let userResult=(await getUserInfo(userName)).user;
+  try {
+    let userResult = (await getUserInfo(userName)).user;
     return `That's what I found:\nRoles:${userResult.roles}\nStatus:${userResult.status}\nCreated at:${userResult.createdAt}\n`
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
 async function getRoomDetails(roomName) {
-  const allGroups=await getGroupsInfo(roomName);
-  for(const group of allGroups){
-    if(group.name===roomName){
+  const allGroups = await getGroupsInfo(roomName);
+  for (const group of allGroups) {
+    if (group.name === roomName) {
       return `That's what I found:\nTotal messages:${group.msgs}\nCreated at:${group.ts}\n`
     }
   }
@@ -158,29 +157,29 @@ async function getRoomDetails(roomName) {
 
 }
 async function sendMessageToUsers(msg, users) {
-  try{
+  try {
     const payLoad = {
       "channel": users,
       "text": msg
     }
     await api.post("chat.postMessage", payLoad)
     return "Message was sent!";
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
 async function removeRoleFromUser(userName, roleName) {
-  try{
-    let user=(await getUserInfo(userName)).user;
+  try {
+    let user = (await getUserInfo(userName)).user;
     const currentRoles = user.roles;
     if (currentRoles === []) {
       return;
     }
     const index = currentRoles.indexOf(roleName);
     if (index > -1) {
-      currentRoles.splice(index, 1); 
+      currentRoles.splice(index, 1);
     }
-    else{
+    else {
       return "Role isn't exist on this user!";
     }
     const payLoad = {
@@ -189,7 +188,7 @@ async function removeRoleFromUser(userName, roleName) {
     }
     await api.post("users.update", payLoad)
     return "Removed role succesfuly!";
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
@@ -198,18 +197,18 @@ async function addRoleToUser(username, roleName) {
     "username": username,
     "roleName": roleName
   }
-  try{
+  try {
     await api.post("roles.addUserToRole", payLoad);
     return "Added role to user succesfuly!"
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
 async function setUserActiveStatus(username, activeStatus) {
-  if(activeStatus!=='true' && activeStatus!=='false'){
+  if (activeStatus !== 'true' && activeStatus !== 'false') {
     return "true/false only!";
   }
-  try{
+  try {
     const userInfo = await getUserInfo(username);
     const payLoad = {
       "userId": userInfo.user._id,
@@ -217,7 +216,7 @@ async function setUserActiveStatus(username, activeStatus) {
     }
     await api.post("users.setActiveStatus", payLoad);
     return "User de/active succesfuly!";
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
@@ -233,10 +232,10 @@ async function createPrivateRoom(roomName, members) {
     "name": roomName,
     "members": members
   }
-  try{
+  try {
     await api.post("groups.create", payLoad);
     return "Room created succesfuly!";
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
 }
@@ -245,13 +244,13 @@ async function createPublicRoom(roomName, members) {
     "name": roomName,
     "members": members
   }
-  try{
+  try {
     await api.post("channels.create", payLoad);
     return "Room created succesfuly!"
-  }catch(err){
+  } catch (err) {
     return err.error;
   }
-  
-  
+
+
 }
 runbot();
