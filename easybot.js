@@ -7,7 +7,7 @@ let myuserid;
 
 const runbot = async () => {
   await driver.connect();
-  myuserid = await driver.login({ username: config.user, password: config.password });
+  myuserid = await driver.login();
   await driver.subscribeToMessages();
   console.log('subscribed');
   driver.reactToMessages(processMessages);
@@ -17,8 +17,9 @@ const runbot = async () => {
 const processMessages = async (err, message) => {
   if (!err) {
     if (message.u._id === myuserid) return;
+    console.log(message);
     if (message.msg.toLowerCase().startsWith(config.botName)) {
-      await driver.sendDirectToUser(await parseMessage(message.msg), message.u.username)
+      await driver.sendToRoomId(await parseMessage(message.msg), message.rid)
     }
   }
 }
@@ -30,74 +31,56 @@ async function parseMessage(message) {
   let users = [];
   switch (messageParts[1]) {
     case "create_room": {
-      if (messageParts.length < 5) {
-        return "Not enough parameters!";
+      if (messageParts.length < config.fiveParts) {
+        return config.parametersMissingError;
       }
       users = []
-      if (messageParts[4] != '') {
-        users = messageParts[4].split(',')
+      if (messageParts[config.fourParts] != '') {
+        users = messageParts[config.fourParts].split(',')
       }
-      return handleCreateRoomCommand(messageParts[2], messageParts[3], users);
+      return handleCreateRoomCommand(messageParts[config.twoParts], messageParts[config.threeParts], users);
     }
     case "set_user_active_status": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
+      if (messageParts.length < config.fourParts) {
+        return config.parametersMissingError;
       }
-      return await setUserActiveStatus(messageParts[2], messageParts[3]);
+      return await setUserActiveStatus(messageParts[config.twoParts], messageParts[config.threeParts]);
     }
-    case "add_role_to_user": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
+    case "update_roles_of_user": {  
+      if (messageParts.length < config.fiveParts) {
+        return config.parametersMissingError;
       }
-      return await addRoleToUser(messageParts[2], messageParts[3]);
+      return await handleUpdateRolesCommand(messageParts[config.twoParts], messageParts[config.threeParts],messageParts[config.fourParts]);
     }
-    case "remove_role_from_user": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
+    case "update_group_member": {  
+      if (messageParts.length < config.fiveParts) {
+        return config.parametersMissingError;
       }
-      return await removeRoleFromUser(messageParts[2], messageParts[3]);
-    }
-    case "add_user_to_group": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
-      }
-      return await addUserToGroup(messageParts[2], messageParts[3]);
-    }
-    case "remove_user_from_group": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
-      }
-      return await removeUserFromGroup(messageParts[2], messageParts[3]);
+      return await handleUpdateGroupMembersCommand(messageParts[config.twoParts], messageParts[config.threeParts],messageParts[config.fourParts]);
     }
     case "send_message": {
-      if (messageParts.length < 4) {
-        return "Not enough parameters!";
+      if (messageParts.length < config.fourParts) {
+        return config.parametersMissingError;
       }
       users = [];
-      if (messageParts[3] === '') {
+      if (messageParts[config.threeParts] === '') {
         return "Please provide user/s!";
       }
-      users = messageParts[3].split(',');
+      users = messageParts[config.threeParts].split(',');
       const usersAsChannel = [];
       for (let user of users) {
         usersAsChannel.push('@' + user)
       }
-      return await sendMessageToUsers(messageParts[2], usersAsChannel);
+      return await sendMessageToUsers(messageParts[config.twoParts], usersAsChannel);
     }
-    case "get_room_details": {
-      if (messageParts.length < 3) {
-        return "Not enough parameters!";
+    case "get_details": {  //cmd_bot;get_details;user/room;name
+      if (messageParts.length < config.fourParts) {
+        return config.parametersMissingError;
       }
-      return await getRoomDetails(messageParts[2]);
-    }
-    case "get_user_details": {
-      if (messageParts.length < 3) {
-        return "Not enough parameters!";
-      }
-      return await getUserDetails(messageParts[2]);
+      return await handleGetDetailsCommand(messageParts[config.twoParts] , messageParts[config.threeParts]);
     }
     default:
-      return "Unvalid command! - type cmd_bot for commands list.";
+      return config.unvalidCommandError;
   }
 }
 async function removeUserFromGroup(roomName, userName) {
@@ -112,14 +95,42 @@ async function removeUserFromGroup(roomName, userName) {
     return err.error;
   }
 }
+async function handleGetDetailsCommand(option,name) {
+  if (option.toLowerCase() === 'user') {
+    return await getUserDetails(name);
+  }
+  else if (option.toLowerCase() === 'room') {
+    return await getRoomDetails(name);
+  }
+  return "Option user/room only!";
+}
+async function handleUpdateGroupMembersCommand(option,groupName, userName) {
+  if (option.toLowerCase() === 'add') {
+    return await addUserToGroup(groupName, userName);
+  }
+  else if (option.toLowerCase() === 'remove') {
+    return await removeUserFromGroup(groupName, userName);
+  }
+  return "Option add/remove only!";
+}
+async function handleUpdateRolesCommand(option, userName, roleName) {
+  if (option.toLowerCase() === 'add') {
+    return await addRoleToUser(userName, roleName);
+  }
+  else if (option.toLowerCase() === 'remove') {
+    return await removeRoleFromUser(userName, roleName);
+  }
+  return "Option add/remove only!";
+}
 async function handleCreateRoomCommand(option, roomName, users) {
+
   if (option.toLowerCase() === 'public') {
     return await createPublicRoom(roomName, users);
   }
   else if (option.toLowerCase() === 'private') {
     return await createPrivateRoom(roomName, users);
   }
-  return "Option true/false only!";
+  return "Option public/private only!";
 }
 async function getGroupsInfo() {
   const res = await api.get("groups.listAll", {});
@@ -153,7 +164,7 @@ async function getRoomDetails(roomName) {
       return `That's what I found:\nTotal messages:${group.msgs}\nCreated at:${group.ts}\n`
     }
   }
-  return "Group isn't exsit!";
+  return "Group isn't exist!";
 
 }
 async function sendMessageToUsers(msg, users) {
@@ -220,7 +231,6 @@ async function setUserActiveStatus(username, activeStatus) {
     return err.error;
   }
 }
-
 async function getUserInfo(username) {
   const payLoad = {
     "username": username,
@@ -250,7 +260,5 @@ async function createPublicRoom(roomName, members) {
   } catch (err) {
     return err.error;
   }
-
-
 }
 runbot();
