@@ -37,7 +37,7 @@ export async function setUserActiveStatus(username, activeStatus) {
       "activeStatus": Boolean(activeStatus)
     }
     await api.post("users.setActiveStatus", payLoad);
-    return "User de/active succesfuly!";
+    return Boolean(activeStatus) ? "User active succesfuly!" : "User deactive succesfuly!";
 }
 export async function addRoleToUser(username, roleName) {
     const payLoad = {

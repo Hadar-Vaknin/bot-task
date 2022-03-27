@@ -1,4 +1,4 @@
-import { driver, api, settings } from '@rocket.chat/sdk'
+import { driver, settings } from '@rocket.chat/sdk'
 import { config } from './config.js';
 import * as repository from './repository.js';
 settings.username = config.user;
@@ -14,10 +14,9 @@ const runbot = async () => {
   driver.reactToMessages(processMessages);
   console.log('connected and waiting for messages');
 }
-
 const processMessages = async (err, message) => {
   if (!err) {
-    if (message.u._id === myuserid) return;
+    if (message.u._id === myuserid || (message.t && message.t==='au') ) return;
     console.log(message);
     if (message.msg.toLowerCase().startsWith(config.botName)) {
       await driver.sendToRoomId(await parseMessage(message.msg), message.rid)
@@ -25,62 +24,69 @@ const processMessages = async (err, message) => {
   }
 }
 async function parseMessage(message) {
-  const messageParts = message.split(';');
+  let messageParts = message.split(';');
   if (message === config.botName) {
     return config.welcomeMsg;
   }
-  let users = [];
-  switch (messageParts[1]) {
+  const command=messageParts[1];
+  messageParts=messageParts.slice(2);
+  switch (command) {
     case "create_room": {
-      if (messageParts.length < config.fiveParts) {
+      if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      if (messageParts[config.fourParts] != '') {
-        users = messageParts[config.fourParts].split(',')
-      }
-      return handleCreateRoomCommand(messageParts[config.twoParts], messageParts[config.threeParts], users);
+      return handleCreateRoomCommand(messageParts);
     }
     case "set_user_active_status": {
-      if (messageParts.length < config.fourParts) {
+      if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }
-      return await setUserActiveStatus(messageParts[config.twoParts], messageParts[config.threeParts]);
+      return await setUserActiveStatus(messageParts);
     }
     case "update_roles_of_user": {  
-      if (messageParts.length < config.fiveParts) {
+      if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return await handleUpdateRolesCommand(messageParts[config.twoParts], messageParts[config.threeParts],messageParts[config.fourParts]);
+      return await handleUpdateRolesCommand(messageParts);
     }
     case "update_group_member": {  
-      if (messageParts.length < config.fiveParts) {
+      if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return await handleUpdateGroupMembersCommand(messageParts[config.twoParts], messageParts[config.threeParts],messageParts[config.fourParts]);
+      return await handleUpdateGroupMembersCommand(messageParts);
     }
     case "send_message": {
-      if (messageParts.length < config.fourParts) {
+      if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }
-      if (messageParts[config.threeParts] === '') {
-        return "Please provide user/s!";
-      }
-      users = messageParts[config.threeParts].split(',');
-      const usersAsChannel = users.map(user => '@' + user)
-      return await repository.sendMessageToUsers(messageParts[config.twoParts], usersAsChannel);
+      const messagePartsCopy=messageParts.join(';');
+      const text=messagePartsCopy.slice(0,(messagePartsCopy.lastIndexOf(';')));
+      const users=messageParts[messageParts.length-1]
+      return await handleSendMsgCommand(text,users)
     }
-    case "get_details": {  
-      if (messageParts.length < config.fourParts) {
+    case "get_details": {
+      if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
-      }
-      return await handleGetDetailsCommand(messageParts[config.twoParts] , messageParts[config.threeParts]);
+      }  
+      return await handleGetDetailsCommand(messageParts);
     }
     default:
       return config.unvalidCommandError;
   }
 }
-
-async function handleGetDetailsCommand(option,name) {
+async function handleSendMsgCommand(text , usersInput) {
+  if (usersInput === '') {
+    return "Please provide user/s!";
+  }
+  console.log(text , usersInput)
+  const users = usersInput.split(',');
+  const usersAsChannel = users.map(user => '@' + user)
+  return await repository.sendMessageToUsers(text, usersAsChannel);
+}
+function validateArgumentsAmount(validAmount, messageParts){
+  return messageParts.length >= validAmount;
+}
+async function handleGetDetailsCommand([option,name]) {
   if (option.toLowerCase() === 'user') {
     return await repository.getUserDetails(name);
   }
@@ -89,7 +95,7 @@ async function handleGetDetailsCommand(option,name) {
   }
   return "Option user/room only!";
 }
-async function handleUpdateGroupMembersCommand(option,groupName, userName) {
+async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
   if (option.toLowerCase() === 'add') {
     return await repository.addUserToGroup(groupName, userName);
   }
@@ -98,7 +104,7 @@ async function handleUpdateGroupMembersCommand(option,groupName, userName) {
   }
   return "Option add/remove only!";
 }
-async function handleUpdateRolesCommand(option, userName, roleName) {
+async function handleUpdateRolesCommand([option, userName, roleName]) {
   if (option.toLowerCase() === 'add') {
     return await repository.addRoleToUser(userName, roleName);
   }
@@ -107,8 +113,10 @@ async function handleUpdateRolesCommand(option, userName, roleName) {
   }
   return "Option add/remove only!";
 }
-async function handleCreateRoomCommand(option, roomName, users) {
-
+async function handleCreateRoomCommand([option, roomName, users]) {
+  if (users !== '') {
+    users = users.split(',')
+  }
   if (option.toLowerCase() === 'public') {
     return await repository.createPublicRoom(roomName, users);
   }
@@ -117,15 +125,15 @@ async function handleCreateRoomCommand(option, roomName, users) {
   }
   return "Option public/private only!";
 }
-async function setUserActiveStatus(username, activeStatus) {
+async function setUserActiveStatus([username, activeStatus]) {
   if (activeStatus !== 'true' && activeStatus !== 'false') {
     return "true/false only!";
   }
   try {
+    activeStatus = (activeStatus === "true");
     return await repository.setUserActiveStatus(username,activeStatus);
   } catch (err) {
     return err.error;
   }
 }
-
 runbot();
