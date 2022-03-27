@@ -1,9 +1,11 @@
-import { driver, settings } from '@rocket.chat/sdk'
+import { driver, settings } from '@rocket.chat/sdk';
+import dotenv from 'dotenv';
 import { config } from './config.js';
 import * as repository from './repository.js';
-settings.username = config.user;
-settings.password = config.password;
-settings.host = config.host;
+dotenv.config();
+settings.username = process.env.USERNAME_ROCKETCHAT ;
+settings.password = process.env.PASSWORD;
+settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {

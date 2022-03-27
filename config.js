@@ -6,15 +6,6 @@ export const config={
     "4)cmd_bot;update_group_member;add/remove;roomName;user\n"+
     "5)cmd_bot;send_message;text;users\n"+
     "7)cmd_bot;get_details;user/room;name\n",
-    host :'http://localhost:3000',
-    user : 'CMD_BOT',
-    password: '1234',
-    botName : 'cmd_bot',
     parametersMissingError: "Not enough parameters!",
-    unvalidCommandError : "Unvalid command! - type cmd_bot for commands list.",
-    fiveParts : 5,
-    fourParts : 4,
-    threeParts :3,
-    twoParts :2
-    
+    unvalidCommandError : "Unvalid command! - type cmd_bot for commands list."
 }

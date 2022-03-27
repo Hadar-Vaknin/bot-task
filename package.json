@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "main": "easybot.js",
   "dependencies": {
-    "@rocket.chat/sdk": "^0.2.9-2"
+    "@rocket.chat/sdk": "^0.2.9-2",
+    "dotenv": "^16.0.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
