@@ -7,7 +7,7 @@ export async function createPublicRoom(roomName, members) {
       }
       try {
         await api.post("channels.create", payLoad);
-        return "Room created succesfuly!"
+        return "Public room created succesfuly!"
       } catch (err) {
         return err.error;
     }
@@ -19,7 +19,7 @@ export async function createPrivateRoom(roomName, members) {
     }
     try {
       await api.post("groups.create", payLoad);
-      return "Room created succesfuly!";
+      return "Private  room created succesfuly!";
     } catch (err) {
       return err.error;
     }

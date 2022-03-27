@@ -19,14 +19,14 @@ const processMessages = async (err, message) => {
     if (message.u._id === myuserid || (message.t && message.t==='au') ) return;
     console.log(message);
     if (message.msg.toLowerCase().startsWith(config.botName)) {
-      await driver.sendToRoomId(await parseMessage(message.msg), message.rid)
+      await driver.sendToRoomId(await parseMessage(message.msg , message.u.username ), message.rid)
     }
   }
 }
-async function parseMessage(message) {
+async function parseMessage(message , userName) {
   let messageParts = message.split(';');
   if (message === config.botName) {
-    return config.welcomeMsg;
+    return userName + ",\n" + config.welcomeMsg;
   }
   const command=messageParts[1];
   messageParts=messageParts.slice(2);
@@ -35,25 +35,25 @@ async function parseMessage(message) {
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return handleCreateRoomCommand(messageParts);
+      return userName + ",\n" + (handleCreateRoomCommand(messageParts));
     }
     case "set_user_active_status": {
       if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }
-      return await setUserActiveStatus(messageParts);
+      return userName + ",\n" + (await setUserActiveStatus(messageParts));
     }
     case "update_roles_of_user": {  
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return await handleUpdateRolesCommand(messageParts);
+      return userName + ",\n" +(await handleUpdateRolesCommand(messageParts));
     }
     case "update_group_member": {  
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return await handleUpdateGroupMembersCommand(messageParts);
+      return userName + ",\n" + (await handleUpdateGroupMembersCommand(messageParts));
     }
     case "send_message": {
       if(!validateArgumentsAmount(2,messageParts)){
@@ -62,16 +62,16 @@ async function parseMessage(message) {
       const messagePartsCopy=messageParts.join(';');
       const text=messagePartsCopy.slice(0,(messagePartsCopy.lastIndexOf(';')));
       const users=messageParts[messageParts.length-1]
-      return await handleSendMsgCommand(text,users)
+      return userName + ",\n" + (await handleSendMsgCommand(text,users));
     }
     case "get_details": {
       if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }  
-      return await handleGetDetailsCommand(messageParts);
+      return userName + ",\n" + (await handleGetDetailsCommand(messageParts));
     }
     default:
-      return config.unvalidCommandError;
+      return userName + ",\n" + config.unvalidCommandError;
   }
 }
 async function handleSendMsgCommand(text , usersInput) {
@@ -93,7 +93,7 @@ async function handleGetDetailsCommand([option,name]) {
   else if (option.toLowerCase() === 'room') {
     return await repository.getRoomDetails(name);
   }
-  return "Option user/room only!";
+  return "You can only get details about user or room!\n"+ option + "is not valid.";
 }
 async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
   if (option.toLowerCase() === 'add') {
@@ -102,7 +102,7 @@ async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
   else if (option.toLowerCase() === 'remove') {
     return await repository.removeUserFromGroup(groupName, userName);
   }
-  return "Option add/remove only!";
+  return "You can add or remove group memebers only!\n" + option + "is not valid.";
 }
 async function handleUpdateRolesCommand([option, userName, roleName]) {
   if (option.toLowerCase() === 'add') {
@@ -111,7 +111,7 @@ async function handleUpdateRolesCommand([option, userName, roleName]) {
   else if (option.toLowerCase() === 'remove') {
     return await repository.removeRoleFromUser(userName, roleName);
   }
-  return "Option add/remove only!";
+  return "You can add or remove user only!\n" + option + "is not valid."; 
 }
 async function handleCreateRoomCommand([option, roomName, users]) {
   if (users !== '') {
@@ -123,11 +123,11 @@ async function handleCreateRoomCommand([option, roomName, users]) {
   else if (option.toLowerCase() === 'private') {
     return await repository.createPrivateRoom(roomName, users);
   }
-  return "Option public/private only!";
+  return "Room can only be public or private!\n" + option + "is not valid."; 
 }
 async function setUserActiveStatus([username, activeStatus]) {
   if (activeStatus !== 'true' && activeStatus !== 'false') {
-    return "true/false only!";
+    return "Argument can be true or false only!\n"+ option + "is not valid.";
   }
   try {
     activeStatus = (activeStatus === "true");
