@@ -37,7 +37,7 @@ export async function setUserActiveStatus(username, activeStatus) {
       "activeStatus": Boolean(activeStatus)
     }
     await api.post("users.setActiveStatus", payLoad);
-    return Boolean(activeStatus) ? "User active succesfuly!" : "User deactive succesfuly!";
+    return Boolean(activeStatus) ? `User @${username} was activate succesfuly!` : `User @${username} deactivate succesfuly!`;
 }
 export async function addRoleToUser(username, roleName) {
     const payLoad = {
@@ -46,7 +46,7 @@ export async function addRoleToUser(username, roleName) {
     }
     try {
       await api.post("roles.addUserToRole", payLoad);
-      return "Added role to user succesfuly!"
+      return `Added role to user @${username} succesfuly!`
     } catch (err) {
       return err.error;
     }
@@ -68,7 +68,7 @@ export async function removeRoleFromUser(userName, roleName) {
         "userId": user._id
       }
       await api.post("users.update", payLoad)
-      return "Removed role succesfuly!";
+      return `Removed role from  user @${userName} succesfuly!`;
     } catch (err) {
       return err.error;
     }
@@ -81,7 +81,7 @@ export async function addUserToGroup(groupName, userName) {
         "userId": userResult.user._id
       }
       await api.post("groups.invite", payLoad)
-      return "Added user to group succesfuly!"
+      return `Added user @${userName} to group succesfuly!`
     } catch (err) {
       return err.error;
     }
@@ -93,7 +93,7 @@ export async function removeUserFromGroup(roomName, userName) {
         "username" :userName
       }
       await api.post("groups.kick", payLoad)
-      return "Removed user from group succesfuly!"
+      return `Removed user @${userName} from group succesfuly!`
     } catch (err) {
       return err.error;
     }
@@ -113,7 +113,7 @@ export async function sendMessageToUsers(text, users) {
 export async function getUserDetails(userName) {
     try {
       const userResult = (await getUserInfo(userName)).user;
-      return `That's what I found:\nRoles:${userResult.roles}\nStatus:${userResult.status}\nCreated at:${userResult.createdAt}\n`
+      return `That's what I found about @${userName}:\nRoles:${userResult.roles}\nStatus:${userResult.status}\nCreated at:${userResult.createdAt}\n`
     } catch (err) {
       return err.error;
     }

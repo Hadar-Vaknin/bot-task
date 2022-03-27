@@ -20,14 +20,14 @@ const processMessages = async (err, message) => {
   if (!err) {
     if (message.u._id === myuserid || (message.t && message.t==='au') ) return;
     console.log(message);
-    if (message.msg.toLowerCase().startsWith(config.botName)) {
+    if (message.msg.toLowerCase().startsWith(process.env.BOT_NAME)) {
       await driver.sendToRoomId(await parseMessage(message.msg , message.u.username ), message.rid)
     }
   }
 }
 async function parseMessage(message , userName) {
   let messageParts = message.split(';');
-  if (message === config.botName) {
+  if (message === process.env.BOT_NAME) {
     return userName + ",\n" + config.welcomeMsg;
   }
   const command=messageParts[1];
