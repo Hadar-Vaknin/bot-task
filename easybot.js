@@ -37,25 +37,25 @@ async function parseMessage(message , userName) {
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return userName + ",\n" + (handleCreateRoomCommand(messageParts));
+      return `${userName},\n*${(handleCreateRoomCommand(messageParts))}*\nFor: ${command}`;
     }
     case "set_user_active_status": {
       if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }
-      return userName + ",\n" + (await setUserActiveStatus(messageParts));
+      return `${userName},\n*${(await setUserActiveStatus(messageParts))}*\nFor: ${command}`;
     }
     case "update_roles_of_user": {  
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return userName + ",\n" +(await handleUpdateRolesCommand(messageParts));
+      return `${userName},\n*${(await handleUpdateRolesCommand(messageParts))}*\nFor: ${command}`;
     }
     case "update_group_member": {  
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return userName + ",\n" + (await handleUpdateGroupMembersCommand(messageParts));
+      return `${userName},\n*${(await handleUpdateGroupMembersCommand(messageParts))}*\nFor: ${command}`;
     }
     case "send_message": {
       if(!validateArgumentsAmount(2,messageParts)){
@@ -64,18 +64,19 @@ async function parseMessage(message , userName) {
       const messagePartsCopy=messageParts.join(';');
       const text=messagePartsCopy.slice(0,(messagePartsCopy.lastIndexOf(';')));
       const users=messageParts[messageParts.length-1]
-      return userName + ",\n" + (await handleSendMsgCommand(text,users));
+      return `${userName},\n*${(await handleSendMsgCommand(text,users))}*\nFor: ${command}`;
     }
     case "get_details": {
       if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }  
-      return userName + ",\n" + (await handleGetDetailsCommand(messageParts));
+      return `${userName},\n*${(await handleGetDetailsCommand(messageParts))}*\nFor: ${command}`;
     }
     default:
-      return userName + ",\n" + config.unvalidCommandError;
+      return `${userName},\n*${config.unvalidCommandError}*`
   }
 }
+
 async function handleSendMsgCommand(text , usersInput) {
   if (usersInput === '') {
     return "Please provide user/s!";
@@ -88,6 +89,7 @@ async function handleSendMsgCommand(text , usersInput) {
 function validateArgumentsAmount(validAmount, messageParts){
   return messageParts.length >= validAmount;
 }
+
 async function handleGetDetailsCommand([option,name]) {
   if (option.toLowerCase() === 'user') {
     return await repository.getUserDetails(name);
@@ -97,6 +99,7 @@ async function handleGetDetailsCommand([option,name]) {
   }
   return "You can only get details about user or room!\n"+ option + "is not valid.";
 }
+
 async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
   if (option.toLowerCase() === 'add') {
     return await repository.addUserToGroup(groupName, userName);
@@ -106,6 +109,7 @@ async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
   }
   return "You can add or remove group memebers only!\n" + option + "is not valid.";
 }
+
 async function handleUpdateRolesCommand([option, userName, roleName]) {
   if (option.toLowerCase() === 'add') {
     return await repository.addRoleToUser(userName, roleName);
@@ -115,6 +119,7 @@ async function handleUpdateRolesCommand([option, userName, roleName]) {
   }
   return "You can add or remove user only!\n" + option + "is not valid."; 
 }
+
 async function handleCreateRoomCommand([option, roomName, users]) {
   if (users !== '') {
     users = users.split(',')
@@ -127,6 +132,7 @@ async function handleCreateRoomCommand([option, roomName, users]) {
   }
   return "Room can only be public or private!\n" + option + "is not valid."; 
 }
+
 async function setUserActiveStatus([username, activeStatus]) {
   if (activeStatus !== 'true' && activeStatus !== 'false') {
     return "Argument can be true or false only!\n"+ option + "is not valid.";
@@ -138,4 +144,5 @@ async function setUserActiveStatus([username, activeStatus]) {
     return err.error;
   }
 }
+
 runbot();

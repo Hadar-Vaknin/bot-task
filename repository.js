@@ -34,10 +34,10 @@ export async function setUserActiveStatus(username, activeStatus) {
     const userInfo = await getUserInfo(username);
     const payLoad = {
       "userId": userInfo.user._id,
-      "activeStatus": Boolean(activeStatus)
+      "activeStatus": activeStatus
     }
     await api.post("users.setActiveStatus", payLoad);
-    return Boolean(activeStatus) ? `User @${username} was activate succesfuly!` : `User @${username} deactivate succesfuly!`;
+    return activeStatus ? `User @${username} was activate succesfuly!` : `User @${username} deactivate succesfuly!`;
 }
 export async function addRoleToUser(username, roleName) {
     const payLoad = {
@@ -55,6 +55,7 @@ export async function removeRoleFromUser(userName, roleName) {
     try {
       const user = (await getUserInfo(userName)).user;
       const currentRoles = user.roles;
+      
       if (currentRoles && currentRoles.length === 0) {
         return;
       }
