@@ -7,5 +7,6 @@ export const config={
     "5)cmd_bot;send_message;text;users\n"+
     "7)cmd_bot;get_details;user/room;name\n",
     parametersMissingError: "Not enough parameters!",
-    unvalidCommandError : "Unvalid command! - type cmd_bot for commands list."
+    unvalidCommandError : "Unvalid command! - type cmd_bot for commands list.",
+    permittedRole:'user'
 }

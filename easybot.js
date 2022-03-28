@@ -9,6 +9,7 @@ settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {
+  console.log(await isUserPermitted('dsg'));
   await driver.connect();
   myuserid = await driver.login();
   await driver.subscribeToMessages();
@@ -18,8 +19,7 @@ const runbot = async () => {
 }
 const processMessages = async (err, message) => {
   if (!err) {
-    if (message.u._id === myuserid || (message.t && message.t==='au') ) return;
-    console.log(message);
+    if (message.u._id === myuserid || (message.t && message.t==='au') || (!(await isUserPermitted( message.u.username)))) return;
     if (message.msg.toLowerCase().startsWith(process.env.BOT_NAME)) {
       await driver.sendToRoomId(await parseMessage(message.msg , message.u.username ), message.rid)
     }
@@ -76,7 +76,10 @@ async function parseMessage(message , userName) {
       return `${userName},\n*${config.unvalidCommandError}*`
   }
 }
-
+async function isUserPermitted(userName){
+  const userRoles=(await repository.getUserInfo(userName)).user.roles;
+  return userRoles.includes(config.permittedRole);
+}
 async function handleSendMsgCommand(text , usersInput) {
   if (usersInput === '') {
     return "Please provide user/s!";
