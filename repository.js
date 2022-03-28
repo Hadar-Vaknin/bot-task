@@ -110,6 +110,18 @@ export async function isAllUsersExist(users) {
     }
     return {success:true};
 }
+export async function isUserExist(user) {
+    try{
+        await getUserInfo(user);
+        
+        return true;
+    }catch(error){
+
+        return false;
+    }
+
+
+}
 export async function sendMessageToUsers(text, users) {
     try {
       const payLoad = {
@@ -125,7 +137,7 @@ export async function sendMessageToUsers(text, users) {
 export async function getUserDetails(userName) {
     try {
       const userResult = (await getUserInfo(userName)).user;
-      return `That's what I found about @${userName}:\nRoles:${userResult.roles}\nStatus:${userResult.status}\nCreated at:${userResult.createdAt}\n`
+      return `That's what I found about @${userName}:\nRoles:${userResult.roles}\nStatus:${userResult.status}\nCreated at:${userResult.createdAt}`
     } catch (err) {
       return err.error;
     }

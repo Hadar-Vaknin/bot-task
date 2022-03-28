@@ -9,7 +9,6 @@ settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {
-  console.log(await handleSendMsgIfAllUsersExist('sadfs;hadar;',"HV,1,2"))
   await driver.connect();
   myuserid = await driver.login();
   await driver.subscribeToMessages();
@@ -31,7 +30,7 @@ async function parseMessage(message , userName) {
     return userName + ",\n" + config.welcomeMsg;
   }
   const command=messageParts[1];
-  messageParts=messageParts.slice(2);
+  messageParts=messageParts.slice(2); // remove the cmd_bot and the command
   switch (command) {
     case "create_room": {
       if(!validateArgumentsAmount(3,messageParts)){
@@ -93,14 +92,20 @@ async function handleSendMsgIfAllUsersExist(text , usersInput) {
   return await repository.sendMessageToUsers(text, usersAsChannel);
 }
 
-// async function handleSendMsgCommand(text , usersInput) {
-//   if (usersInput === '') {
-//     return "Please provide user/s!";
-//   }
-//   const users = usersInput.split(',');
-//   const usersAsChannel = users.map(user => '@' + user)
-//   return await repository.sendMessageToUsers(text, usersAsChannel);
-// }
+async function handleSendMsgCommand(text , usersInput) {
+  if (usersInput === '') {
+    return "Please provide user/s!";
+  }
+  usersInput = usersInput.split(',');
+  const users=[];
+  for(const user of usersInput){
+    if(await repository.isUserExist(user)){
+      users.push(user);
+    }
+  }
+  const usersAsChannel = users.map(user => '@' + user)
+  return await repository.sendMessageToUsers(text, usersAsChannel);
+}
 
 function validateArgumentsAmount(validAmount, messageParts){
   return messageParts.length >= validAmount;
