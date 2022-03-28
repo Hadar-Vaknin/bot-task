@@ -9,7 +9,7 @@ settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {
-  console.log(await isUserPermitted('dsg'));
+  console.log(await handleSendMsgIfAllUsersExist('sadfs;hadar;',"HV,1,2"))
   await driver.connect();
   myuserid = await driver.login();
   await driver.subscribeToMessages();
@@ -80,15 +80,28 @@ async function isUserPermitted(userName){
   const userRoles=(await repository.getUserInfo(userName)).user.roles;
   return userRoles.includes(config.permittedRole);
 }
-async function handleSendMsgCommand(text , usersInput) {
+async function handleSendMsgIfAllUsersExist(text , usersInput) {
   if (usersInput === '') {
     return "Please provide user/s!";
   }
-  console.log(text , usersInput)
   const users = usersInput.split(',');
+  const isAllUsersExist = await repository.isAllUsersExist(users);
+  if(!isAllUsersExist.success){
+    return isAllUsersExist.msg;
+  }
   const usersAsChannel = users.map(user => '@' + user)
   return await repository.sendMessageToUsers(text, usersAsChannel);
 }
+
+// async function handleSendMsgCommand(text , usersInput) {
+//   if (usersInput === '') {
+//     return "Please provide user/s!";
+//   }
+//   const users = usersInput.split(',');
+//   const usersAsChannel = users.map(user => '@' + user)
+//   return await repository.sendMessageToUsers(text, usersAsChannel);
+// }
+
 function validateArgumentsAmount(validAmount, messageParts){
   return messageParts.length >= validAmount;
 }

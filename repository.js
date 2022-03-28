@@ -99,6 +99,17 @@ export async function removeUserFromGroup(roomName, userName) {
       return err.error;
     }
 }
+export async function isAllUsersExist(users) {
+    for(const user of users){
+        try{
+            await getUserInfo(user);
+        }catch(error){
+
+            return {success:false , msg:`User ${user} not exist!` };
+        }
+    }
+    return {success:true};
+}
 export async function sendMessageToUsers(text, users) {
     try {
       const payLoad = {
