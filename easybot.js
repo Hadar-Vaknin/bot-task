@@ -8,6 +8,7 @@ settings.password = process.env.PASSWORD;
 settings.host = process.env.HOST;
 let myuserid;
 
+
 const runbot = async () => {
   await driver.connect();
   myuserid = await driver.login();
