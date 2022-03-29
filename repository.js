@@ -1,5 +1,17 @@
 import { api } from '@rocket.chat/sdk'
-
+import { createClient } from 'redis';
+let client;
+export async function createRedisClient() {
+    client = createClient();
+    client.on('error', (err) => console.log('Redis Client Error', err));
+    await client.connect();
+}
+export async function getUserFromRedis(userName) {
+    return JSON.parse(await client.get(userName))
+}
+export async function writeUserToRedis(userName ,user) {
+    return client.set(userName,JSON.stringify(user));
+}
 export async function createPublicRoom(roomName, members) {
     const payLoad = {
         "name": roomName,
@@ -25,10 +37,17 @@ export async function createPrivateRoom(roomName, members) {
     }
 }
 export async function getUserInfo(username) {
+    let returnedUser = await getUserFromRedis(username);
+    if(returnedUser){
+        console.log(returnedUser)
+        return returnedUser;
+    }
     const payLoad = {
       username,
     }
-    return await api.get("users.info", payLoad);
+    returnedUser= await api.get("users.info", payLoad);
+    await writeUserToRedis(username, returnedUser);
+    return returnedUser;
 }
 export async function setUserActiveStatus(username, activeStatus) {
     const userInfo = await getUserInfo(username);
@@ -113,14 +132,11 @@ export async function isAllUsersExist(users) {
 export async function isUserExist(user) {
     try{
         await getUserInfo(user);
-        
+
         return true;
     }catch(error){
-
         return false;
     }
-
-
 }
 export async function sendMessageToUsers(text, users) {
     try {

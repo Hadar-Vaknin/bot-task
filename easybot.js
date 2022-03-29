@@ -9,6 +9,7 @@ settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {
+  await repository.createRedisClient();
   await driver.connect();
   myuserid = await driver.login();
   await driver.subscribeToMessages();
@@ -78,7 +79,8 @@ async function parseMessage(message , userName) {
 async function isUserPermitted(userName){
   const userRoles=(await repository.getUserInfo(userName)).user.roles;
   return userRoles.includes(config.permittedRole);
-}
+} 
+
 async function handleSendMsgIfAllUsersExist(text , usersInput) {
   if (usersInput === '') {
     return "Please provide user/s!";
@@ -167,3 +169,4 @@ async function setUserActiveStatus([username, activeStatus]) {
 }
 
 runbot();
+
