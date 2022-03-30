@@ -57,14 +57,17 @@ async function parseMessage(message , userName) {
       }
       return `${userName},\n*${(await handleUpdateGroupMembersCommand(messageParts))}*\nFor: ${command}`;
     }
-    case "send_message": {
+    case "send_message": { 
       if(!validateArgumentsAmount(2,messageParts)){
         return config.parametersMissingError;
       }
       const messagePartsCopy=messageParts.join(';');
-      const text=messagePartsCopy.slice(0,(messagePartsCopy.lastIndexOf(';')));
-      const users=messageParts[messageParts.length-1]
-      return `${userName},\n*${(await handleSendMsgCommand(text,users,"2"))}*\nFor: ${command}`;
+      const lastIndexOfseperator=messagePartsCopy.lastIndexOf(';');
+      const option=messagePartsCopy.substring(lastIndexOfseperator+1,messagePartsCopy.length);
+      const textAndUsers=messagePartsCopy.slice(0,lastIndexOfseperator);
+      const text=textAndUsers.substring(0,(textAndUsers.lastIndexOf(';')));
+      const users=textAndUsers.substring(textAndUsers.lastIndexOf(';')+1, textAndUsers.length);
+      return `${userName},\n*${(await handleSendMsgCommand(text,users,option))}*\nFor: ${command}`;
     }
     case "get_details": {
       if(!validateArgumentsAmount(2,messageParts)){
