@@ -5,12 +5,14 @@ export async function createRedisClient() {
     client = createClient();
     client.on('error', (err) => console.log('Redis Client Error', err));
     await client.connect();
+    client.del("HV");
 }
 export async function getUserFromRedis(userName) {
     return JSON.parse(await client.get(userName))
 }
 export async function writeUserToRedis(userName ,user) {
-    return client.set(userName,JSON.stringify(user));
+    await client.set(userName,JSON.stringify(user));
+    await client.expire(userName , (60*15));
 }
 export async function createPublicRoom(roomName, members) {
     const payLoad = {
@@ -39,7 +41,7 @@ export async function createPrivateRoom(roomName, members) {
 export async function getUserInfo(username) {
     let returnedUser = await getUserFromRedis(username);
     if(returnedUser){
-        console.log(returnedUser)
+            console.log("getUserFromRedis**********")
         return returnedUser;
     }
     const payLoad = {
@@ -138,13 +140,17 @@ export async function isUserExist(user) {
         return false;
     }
 }
-export async function sendMessageToUsers(text, users) {
+export async function sendMessageToUsers(text, users, option) {
     try {
       const payLoad = {
         "channel": users,
+        option,
         text
       }
-      await api.post("chat.postMessage", payLoad)
+      const result=await api.post("chat.postMessage", payLoad);
+      if(result.message.unExistingUsers && result.message.unExistingUsers.length!==0){
+        return `Message was sent! except: ${result.message.unExistingUsers.join(',')}`
+      }
       return "Message was sent!";
     } catch (err) {
       return err.error;

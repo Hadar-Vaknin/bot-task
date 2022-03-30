@@ -64,7 +64,7 @@ async function parseMessage(message , userName) {
       const messagePartsCopy=messageParts.join(';');
       const text=messagePartsCopy.slice(0,(messagePartsCopy.lastIndexOf(';')));
       const users=messageParts[messageParts.length-1]
-      return `${userName},\n*${(await handleSendMsgCommand(text,users))}*\nFor: ${command}`;
+      return `${userName},\n*${(await handleSendMsgCommand(text,users,"2"))}*\nFor: ${command}`;
     }
     case "get_details": {
       if(!validateArgumentsAmount(2,messageParts)){
@@ -80,34 +80,39 @@ async function isUserPermitted(userName){
   const userRoles=(await repository.getUserInfo(userName)).user.roles;
   return userRoles.includes(config.permittedRole);
 } 
-
 async function handleSendMsgIfAllUsersExist(text , usersInput) {
   if (usersInput === '') {
     return "Please provide user/s!";
   }
   const users = usersInput.split(',');
-  const isAllUsersExist = await repository.isAllUsersExist(users);
-  if(!isAllUsersExist.success){
-    return isAllUsersExist.msg;
-  }
   const usersAsChannel = users.map(user => '@' + user)
   return await repository.sendMessageToUsers(text, usersAsChannel);
 }
 
-async function handleSendMsgCommand(text , usersInput) {
+async function handleSendMsgCommand(text , usersInput, option) {
   if (usersInput === '') {
     return "Please provide user/s!";
   }
   usersInput = usersInput.split(',');
-  const users=[];
-  for(const user of usersInput){
-    if(await repository.isUserExist(user)){
-      users.push(user);
-    }
-  }
-  const usersAsChannel = users.map(user => '@' + user)
-  return await repository.sendMessageToUsers(text, usersAsChannel);
+  const usersAsChannel = usersInput.map(user => '@' + user)
+  return await repository.sendMessageToUsers(text, usersAsChannel,option);
 }
+
+
+// async function handleSendMsgCommand(text , usersInput) {
+//   if (usersInput === '') {
+//     return "Please provide user/s!";
+//   }
+//   usersInput = usersInput.split(',');
+//   const users=[];
+//   for(const user of usersInput){
+//     if(await repository.isUserExist(user)){
+//       users.push(user);
+//     }
+//   }
+//   const usersAsChannel = users.map(user => '@' + user)
+//   return await repository.sendMessageToUsers(text, usersAsChannel);
+// }
 
 function validateArgumentsAmount(validAmount, messageParts){
   return messageParts.length >= validAmount;
