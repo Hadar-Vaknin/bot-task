@@ -62,12 +62,7 @@ async function parseMessage(message , userName) {
         return config.parametersMissingError;
       }
       const messagePartsCopy=messageParts.join(';');
-      const lastIndexOfseperator=messagePartsCopy.lastIndexOf(';');
-      const option=messagePartsCopy.substring(lastIndexOfseperator+1,messagePartsCopy.length);
-      const textAndUsers=messagePartsCopy.slice(0,lastIndexOfseperator);
-      const text=textAndUsers.substring(0,(textAndUsers.lastIndexOf(';')));
-      const users=textAndUsers.substring(textAndUsers.lastIndexOf(';')+1, textAndUsers.length);
-      return `${userName},\n*${(await handleSendMsgCommand(text,users,option))}*\nFor: ${command}`;
+      return `${userName},\n*${(await handleSendMsgCommand(parseSendMsgInput(messagePartsCopy)))}*\nFor: ${command}`;
     }
     case "get_details": {
       if(!validateArgumentsAmount(2,messageParts)){
@@ -79,12 +74,20 @@ async function parseMessage(message , userName) {
       return `${userName},\n*${config.unvalidCommandError}*`
   }
 }
+function parseSendMsgInput(messagePartsCopy) {
+  const lastIndexOfseperator=messagePartsCopy.lastIndexOf(';');
+  const option=messagePartsCopy.substring(lastIndexOfseperator+1,messagePartsCopy.length);
+  const textAndUsers=messagePartsCopy.slice(0,lastIndexOfseperator);
+  const text=textAndUsers.substring(0,(textAndUsers.lastIndexOf(';')));
+  const users=textAndUsers.substring(textAndUsers.lastIndexOf(';')+1, textAndUsers.length);
+  return [text,users,option]
+}
 async function isUserPermitted(userName){
   const userRoles=(await repository.getUserInfo(userName)).user.roles;
   return userRoles.includes(config.permittedRole);
 } 
 
-async function handleSendMsgCommand(text , usersInput, option) {
+async function handleSendMsgCommand([text , usersInput, option]) {
   if (usersInput === '') {
     return "Please provide user/s!";
   }
