@@ -8,5 +8,8 @@ export const config={
     "7)cmd_bot;get_details;user/room;name\n",
     parametersMissingError: "Not enough parameters!",
     unvalidCommandError : "Unvalid command! - type cmd_bot for commands list.",
-    permittedRole:'user'
+    permittedRole:'user',
+    roomTypes:{public:"public" , private:"private"},
+    updateOptions:{add:"add" , remove:"remove"},
+    getDetailsOptions : {user:"user", room:"room"}
 }

@@ -19,7 +19,7 @@ const runbot = async () => {
 }
 const processMessages = async (err, message) => {
   if (!err) {
-    if (message.u._id === myuserid || (message.t && message.t==='au') || (!(await isUserPermitted( message.u.username)))) return;
+    if (message.u._id === myuserid || (message.t && (message.t==='au' || message.t==='ru')) || (!(await isUserPermitted( message.u.username)))) return;
     if (message.msg.toLowerCase().startsWith(process.env.BOT_NAME)) {
       await driver.sendToRoomId(await parseMessage(message.msg , message.u.username ), message.rid)
     }
@@ -37,7 +37,7 @@ async function parseMessage(message , userName) {
       if(!validateArgumentsAmount(3,messageParts)){
         return config.parametersMissingError;
       }
-      return `${userName},\n*${(handleCreateRoomCommand(messageParts))}*\nFor: ${command}`;
+      return `${userName},\n*${(await handleCreateRoomCommand(messageParts))}*\nFor: ${command}`;
     }
     case "set_user_active_status": {
       if(!validateArgumentsAmount(2,messageParts)){
@@ -83,90 +83,66 @@ async function isUserPermitted(userName){
   const userRoles=(await repository.getUserInfo(userName)).user.roles;
   return userRoles.includes(config.permittedRole);
 } 
-async function handleSendMsgIfAllUsersExist(text , usersInput) {
-  if (usersInput === '') {
-    return "Please provide user/s!";
-  }
-  const users = usersInput.split(',');
-  const usersAsChannel = users.map(user => '@' + user)
-  return await repository.sendMessageToUsers(text, usersAsChannel);
-}
 
 async function handleSendMsgCommand(text , usersInput, option) {
   if (usersInput === '') {
     return "Please provide user/s!";
   }
   usersInput = usersInput.split(',');
-  const usersAsChannel = usersInput.map(user => '@' + user)
+  const usersAsChannel = usersInput.map(user => `@${user}`)
   return await repository.sendMessageToUsers(text, usersAsChannel,option);
 }
-
-
-// async function handleSendMsgCommand(text , usersInput) {
-//   if (usersInput === '') {
-//     return "Please provide user/s!";
-//   }
-//   usersInput = usersInput.split(',');
-//   const users=[];
-//   for(const user of usersInput){
-//     if(await repository.isUserExist(user)){
-//       users.push(user);
-//     }
-//   }
-//   const usersAsChannel = users.map(user => '@' + user)
-//   return await repository.sendMessageToUsers(text, usersAsChannel);
-// }
 
 function validateArgumentsAmount(validAmount, messageParts){
   return messageParts.length >= validAmount;
 }
 
 async function handleGetDetailsCommand([option,name]) {
-  if (option.toLowerCase() === 'user') {
+  if (option.toLowerCase() === config.getDetailsOptions.user) {
     return await repository.getUserDetails(name);
   }
-  else if (option.toLowerCase() === 'room') {
+  else if (option.toLowerCase() === config.getDetailsOptions.room) {
     return await repository.getRoomDetails(name);
   }
-  return "You can only get details about user or room!\n"+ option + "is not valid.";
+  return `You can only get details about user or room!\n${option}s not valid.`;
 }
 
 async function handleUpdateGroupMembersCommand([option,groupName, userName]) {
-  if (option.toLowerCase() === 'add') {
+  if (option.toLowerCase() === config.updateOptions.add) {
     return await repository.addUserToGroup(groupName, userName);
   }
-  else if (option.toLowerCase() === 'remove') {
+  else if (option.toLowerCase() === config.updateOptions.remove) {
     return await repository.removeUserFromGroup(groupName, userName);
   }
-  return "You can add or remove group memebers only!\n" + option + "is not valid.";
+  return `You can add or remove group memebers only!\n${option}is not valid.`;
 }
 
 async function handleUpdateRolesCommand([option, userName, roleName]) {
-  if (option.toLowerCase() === 'add') {
+  if (option.toLowerCase() === config.updateOptions.add) {
     return await repository.addRoleToUser(userName, roleName);
   }
-  else if (option.toLowerCase() === 'remove') {
+  else if (option.toLowerCase() === config.updateOptions.remove) {
     return await repository.removeRoleFromUser(userName, roleName);
   }
-  return "You can add or remove user only!\n" + option + "is not valid."; 
+  return `You can add or remove user only!\n${option}is not valid.`; 
 }
 
 async function handleCreateRoomCommand([option, roomName, users]) {
   if (users !== '') {
     users = users.split(',')
   }
-  if (option.toLowerCase() === 'public') {
+  if (option.toLowerCase() === config.roomTypes.public) {
     return await repository.createPublicRoom(roomName, users);
   }
-  else if (option.toLowerCase() === 'private') {
+  else if (option.toLowerCase() === config.roomTypes.private) {
     return await repository.createPrivateRoom(roomName, users);
   }
-  return "Room can only be public or private!\n" + option + "is not valid."; 
+  return `Room can only be public or private!\n${option}is not valid.`; 
 }
 
 async function setUserActiveStatus([username, activeStatus]) {
   if (activeStatus !== 'true' && activeStatus !== 'false') {
-    return "Argument can be true or false only!\n"+ option + "is not valid.";
+    return `Argument can be true or false only!\n${option}is not valid.`;
   }
   try {
     activeStatus = (activeStatus === "true");

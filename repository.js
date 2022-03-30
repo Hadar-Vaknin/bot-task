@@ -41,13 +41,9 @@ export async function createPrivateRoom(roomName, members) {
 export async function getUserInfo(username) {
     let returnedUser = await getUserFromRedis(username);
     if(returnedUser){
-            console.log("getUserFromRedis**********")
-        return returnedUser;
+      return returnedUser;
     }
-    const payLoad = {
-      username,
-    }
-    returnedUser= await api.get("users.info", payLoad);
+    returnedUser= await api.get("users.info", {username});
     await writeUserToRedis(username, returnedUser);
     return returnedUser;
 }
@@ -61,12 +57,8 @@ export async function setUserActiveStatus(username, activeStatus) {
     return activeStatus ? `User @${username} was activate succesfuly!` : `User @${username} deactivate succesfuly!`;
 }
 export async function addRoleToUser(username, roleName) {
-    const payLoad = {
-      username,
-      roleName
-    }
     try {
-      await api.post("roles.addUserToRole", payLoad);
+      await api.post("roles.addUserToRole", {username,roleName});
       return `Added role to user @${username} succesfuly!`
     } catch (err) {
       return err.error;
@@ -108,14 +100,10 @@ export async function addUserToGroup(groupName, userName) {
       return err.error;
     }
 }
-export async function removeUserFromGroup(roomName, userName) {
+export async function removeUserFromGroup(roomName, username) {
     try {
-      const payLoad = {
-        roomName,
-        "username" :userName
-      }
-      await api.post("groups.kick", payLoad)
-      return `Removed user @${userName} from group succesfuly!`
+      await api.post("groups.kick", {roomName,username})
+      return `Removed user @${username} from group succesfuly!`
     } catch (err) {
       return err.error;
     }
