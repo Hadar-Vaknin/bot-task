@@ -159,11 +159,10 @@ async function getGroupsInfo() {
   
 export async function getRoomDetails(roomName) {
     const allGroups = await getGroupsInfo(roomName);
-    for (const group of allGroups) {
-      if (group.name === roomName) {
-        return `That's what I found:\nTotal messages:${group.msgs}\nCreated at:${group.ts}\n`
-      }
-    }
+    const wantedGroup=allGroups.find((group)=>group.name===roomName);
+    if(wantedGroup)
+      return `That's what I found:\nTotal messages:${wantedGroup.msgs}\nCreated at:${wantedGroup.ts}\n`
+
     return "Group isn't exist!";
   
   }
