@@ -2,6 +2,7 @@ import { driver, settings } from '@rocket.chat/sdk';
 import dotenv from 'dotenv';
 import { config } from './config.js';
 import * as repository from './repository.js';
+import * as redisHandler from './redisHandler.js'
 dotenv.config();
 settings.username = process.env.USERNAME_ROCKETCHAT ;
 settings.password = process.env.PASSWORD;
@@ -9,7 +10,7 @@ settings.host = process.env.HOST;
 let myuserid;
 
 const runbot = async () => {
-  await repository.createRedisClient();
+  await redisHandler.createRedisClient();
   await driver.connect();
   myuserid = await driver.login();
   await driver.subscribeToMessages();

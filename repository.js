@@ -1,19 +1,6 @@
 import { api } from '@rocket.chat/sdk'
-import { createClient } from 'redis';
-let client;
-export async function createRedisClient() {
-    client = createClient();
-    client.on('error', (err) => console.log('Redis Client Error', err));
-    await client.connect();
-    client.del("HV");
-}
-export async function getUserFromRedis(userName) {
-    return JSON.parse(await client.get(userName))
-}
-export async function writeUserToRedis(userName ,user) {
-    await client.set(userName,JSON.stringify(user));
-    await client.expire(userName , (60*15));
-}
+import * as redisHandler from './redisHandler.js'
+
 export async function createPublicRoom(roomName, members) {
     const payLoad = {
         "name": roomName,
@@ -39,12 +26,12 @@ export async function createPrivateRoom(roomName, members) {
     }
 }
 export async function getUserInfo(username) {
-    let returnedUser = await getUserFromRedis(username);
+    let returnedUser = await redisHandler.getUserFromRedis(username);
     if(returnedUser){
       return returnedUser;
     }
     returnedUser= await api.get("users.info", {username});
-    await writeUserToRedis(username, returnedUser);
+    await redisHandler.writeUserToRedis(username, returnedUser);
     return returnedUser;
 }
 export async function setUserActiveStatus(username, activeStatus) {
@@ -107,17 +94,6 @@ export async function removeUserFromGroup(roomName, username) {
     } catch (err) {
       return err.error;
     }
-}
-export async function isAllUsersExist(users) {
-    for(const user of users){
-        try{
-            await getUserInfo(user);
-        }catch(error){
-
-            return {success:false , msg:`User ${user} not exist!` };
-        }
-    }
-    return {success:true};
 }
 export async function isUserExist(user) {
     try{
