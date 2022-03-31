@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 let client;
 export async function createRedisClient() {
     try{
-      client = createClient();
+      client = createClient({host:"127.0.0.1" ,port:"6379"});
     }catch(error){
       console.log(error)
     }

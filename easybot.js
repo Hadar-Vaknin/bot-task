@@ -76,11 +76,12 @@ async function parseMessage(message , userName) {
   }
 }
 function parseSendMsgInput(messagePartsCopy) {
-  const lastIndexOfseperator=messagePartsCopy.lastIndexOf(';');
+  const lastIndexOfseperator = messagePartsCopy.lastIndexOf(';');
   const option=messagePartsCopy.substring(lastIndexOfseperator+1,messagePartsCopy.length);
   const textAndUsers=messagePartsCopy.slice(0,lastIndexOfseperator);
   const text=textAndUsers.substring(0,(textAndUsers.lastIndexOf(';')));
   const users=textAndUsers.substring(textAndUsers.lastIndexOf(';')+1, textAndUsers.length);
+
   return [text,users,option]
 }
 async function isUserPermitted(userName){
