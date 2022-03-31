@@ -128,6 +128,7 @@ export async function isUserExist(user) {
         return false;
     }
 }
+
 export async function sendMessageToUsers(text, users, option) {
     try {
       const payLoad = {
