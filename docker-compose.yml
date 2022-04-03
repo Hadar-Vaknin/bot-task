@@ -1,12 +1,12 @@
 version: '3'
 services:
-  redis:
-    image: "redis_image" 
+  redis-server:
+    image: "redis" 
     ports:
       - "6379:6379"
     restart: always
   cmdBot:
-    image: cmd_bot
+    image: cmd_bot:latest
     # depends_on:
-    #   - redis
+    #   - redis-server
 
