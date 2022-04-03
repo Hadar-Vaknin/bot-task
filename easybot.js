@@ -8,10 +8,10 @@ settings.username = process.env.USERNAME_ROCKETCHAT ;
 settings.password = process.env.PASSWORD;
 settings.host = process.env.HOST;
 let myuserid;
-
+console.log(settings.username , settings.password , settings.host)
 const runbot = async () => {
   await redisHandler.createRedisClient();
-  await driver.connect();
+  await driver.connect({useSsl: "false" });
   myuserid = await driver.login();
   await driver.subscribeToMessages();
   console.log('subscribed');

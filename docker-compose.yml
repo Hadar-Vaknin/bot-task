@@ -4,9 +4,14 @@ services:
     image: "redis" 
     ports:
       - "6379:6379"
-    restart: always
   cmdBot:
-    image: cmd_bot:latest
-    # depends_on:
-    #   - redis-server
+    image: "cmd_bot:latest"
+    environment:
+      - HOST=http://172.31.0.1:3000
+      - USERNAME_ROCKETCHAT=CMD_BOT
+      - PASSWORD=1234
+      - BOT_NAME=cmd_bot
+      - ROCKETCHAT_URL=http://172.31.0.1:3000
+  
+
 
