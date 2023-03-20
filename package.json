@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "name": "bot-task",
+  "version": "1.0.0",
+  "main": "easybot.js",
+  "dependencies": {
+    "@rocket.chat/sdk": "^0.2.9-2",
+    "dotenv": "^16.0.0",
+    "redis": "^4.0.4",
+    "redis-json": "^6.0.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hadar-Vaknin/bot-task.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hadar-Vaknin/bot-task/issues"
+  },
+  "homepage": "https://github.com/Hadar-Vaknin/bot-task#readme",
+  "description": ""
+}

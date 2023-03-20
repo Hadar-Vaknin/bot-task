@@ -1,0 +1,17 @@
+version: '3'
+services:
+  redis-server:
+    image: "redis" 
+    ports:
+      - "6379:6379"
+  cmdBot:
+    image: "cmd_bot:latest"
+    environment:
+      - HOST=http://172.31.0.1:3000
+      - USERNAME_ROCKETCHAT=CMD_BOT
+      - PASSWORD=1234
+      - BOT_NAME=cmd_bot
+      - ROCKETCHAT_URL=http://172.31.0.1:3000
+  
+
+
